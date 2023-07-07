@@ -115,7 +115,7 @@ def add(*args):
     return f"Added name {name} with phone number {phone}"
 
 
-input_error
+@input_error
 def change(*args): 
     result = checking_args(*args)
     if result:
