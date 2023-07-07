@@ -34,6 +34,10 @@ class Record():
         if phone:
             self.phones.append(phone)
 
+    def delete_phone(self, phone):
+        if phone:
+            self.phones.remove(phone)
+
     def change_phone(self, old_phone: Phone, new_phone: Phone):
         if old_phone in self.phones:
             self.phones.remove(old_phone)
