@@ -22,7 +22,7 @@ class Phone(Field):
 class Record():
     def __init__(self, name: Name, phone=None):
         self.name = name        
-        self.phones = []
+        self.phones = [phone] if phone else []
 
     def __str__(self):
         return f'{self.name.value}: {self.phones}'
@@ -30,22 +30,18 @@ class Record():
     def __repr__(self):
         return str(self.phones)
         
-    def add_phone(self, phone):
-        if phone:
-            self.phones.append(phone)
+    def add_phone(self, phone: Phone):
+        self.phones.append(phone)
 
     def delete_phone(self, phone):
-        if phone:
-            self.phones.remove(phone)
+        for item in self.phones:
+            if item.value == phone.value:
+                self.phones.remove(item)
 
     def change_phone(self, old_phone: Phone, new_phone: Phone):
-        if old_phone in self.phones:
-            self.phones.remove(old_phone)
-            self.phones.append(new_phone)
-            return f"The phone {old_phone} was replaced by {new_phone}"
-        else:
-            return f"Phone {old_phone} does not exist"
-
+        self.delete_phone(old_phone)
+        self.phones.append(new_phone)
+        return f"phone {old_phone} was replaced by {new_phone}"
 
 
 class AddressBook(UserDict):
@@ -55,16 +51,13 @@ class AddressBook(UserDict):
 
     def add_record(self, record: Record):
         if record.name.value not in self.keys():
-            self.data[record.name.value] = record            
-        else:
+            self.data[record.name.value] = record 
+            return f"Added {record.name.value} with phone number {record.phones}"
+        else:            
             return f"Record {record.name.value} alredy exists"
-        return
+        
 
 phone_book = AddressBook({})
-name = Name()
-phone = Phone()
-field = Field()
-record = Record(name)
 
 
 def input_error(func):
@@ -107,12 +100,11 @@ def add(*args):
     if result:
         return result
     else:
-        name.value = args[0].capitalize()
-        phone = args[1]
-        record.name = name
-        record.add_phone(phone)
-        phone_book.add_record(record)
-    return f"Added name {name} with phone number {phone}"
+        name = Name(args[0].capitalize())
+        phone = Phone(args[1])
+        record = Record(name, phone)
+        result = phone_book.add_record(record)
+    return result
 
 
 @input_error
@@ -123,22 +115,24 @@ def change(*args):
     else:
         name = Name(args[0].capitalize())
         phone = Phone(args[1])
-        record.name = name
-        for key, value in phone_book.items():
-            if key == record.name.value:                
-                record.change_phone(record.phones[0], phone)                
-                return f"{name}'s phone number change to {phone}"
+        record = Record(name)
+        if phone_book.get(record.name.value):
+            rec = phone_book[record.name.value]
+            old_phone = rec.phones[0]            
+            result = rec.change_phone(old_phone, phone)
+            return f"{name}'s {result}"
+        else:
+            return f"{name} does not exist"
 
 
 @input_error
 def phone(*args):
     if args[0].isalpha:
         name = Name(args[0].capitalize())
-        record.name = name
+        record = Record(name)
         for key, value in phone_book.items():
-            if key == record.name.value:
-                record.__str__()
-                return f"{name} has phone number {record.phones}"
+            if key == record.name.value:                             
+                return f"{key} has phone number {value.phones[0]}"
         else:
             return f"Name '{name}' was not found"
     else:
@@ -146,8 +140,7 @@ def phone(*args):
         
     
 def show(*args):    
-    return phone_book
-
+    return "\n".join(f"{value}" for value in phone_book.values())
 
 def bye(*args):
     return "Good bye!"
