@@ -44,11 +44,7 @@ class Record():
         return f"phone {old_phone} was replaced by {new_phone}"
 
 
-class AddressBook(UserDict):
-    def __init__(self, records=None):
-        self.records = records
-        super().__init__()
-
+class AddressBook(UserDict):    
     def add_record(self, record: Record):
         if record.name.value not in self.keys():
             self.data[record.name.value] = record 
@@ -118,11 +114,15 @@ def change(*args):
         record = Record(name)
         if phone_book.get(record.name.value):
             rec = phone_book[record.name.value]
-            old_phone = rec.phones[0]            
-            result = rec.change_phone(old_phone, phone)
-            return f"{name}'s {result}"
+            if rec.phones:
+                for item in rec.phones:
+                    old_phone = item            
+                    result = rec.change_phone(old_phone, phone)
+                    return f"{name}'s {result}"
+            else:
+                return f"{name}'s name doesn't have a phone"
         else:
-            return f"{name} does not exist"
+            return f"Name {name} does not exist"
 
 
 @input_error
