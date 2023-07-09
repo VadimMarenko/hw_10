@@ -48,7 +48,7 @@ class AddressBook(UserDict):
     def add_record(self, record: Record):
         if record.name.value not in self.keys():
             self.data[record.name.value] = record 
-            return f"Added {record.name.value} with phone number {record.phones}"
+            return f"Added {record.name.value} with phone number {', '.join(str(phone) for phone in record.phones)}"
         else:            
             return f"Record {record.name.value} alredy exists"
         
@@ -132,17 +132,17 @@ def phone(*args):
         record = Record(name)
         for key, value in phone_book.items():
             if key == record.name.value:                             
-                return f"{key} has phone number {value.phones[0]}"
+                return f"{key} has phone number {', '.join(str(phone) for phone in value.phones)}"
         else:
             return f"Name '{name}' was not found"
     else:
         return "Give me name please"
         
     
-def show(*args):    
-    return "\n".join(f"{value}" for value in phone_book.values())
+def show_all(*args):    
+    return "\n".join((str(record.name) + ' - ' + ', '.join(str(phone) for phone in record.phones)) for record in phone_book.values())
 
-def bye(*args):
+def exit(*args):
     return "Good bye!"
 
 
@@ -154,8 +154,8 @@ commands = {greeting: ("hello", ),
             add: ("add", ),
             change: ("change", ),
             phone: ("phone", ),
-            show: ("show all", ),
-            bye: ("good bye", "close", "exit")}
+            show_all: ("show all", ),
+            exit: ("good bye", "close", "exit")}
 
 
 def parser(text: str) -> tuple[callable, tuple[str]|None]:
